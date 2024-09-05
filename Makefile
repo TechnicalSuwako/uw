@@ -15,7 +15,7 @@ OS = dragonfly
 OS = linux
 .endif
 
-.if ${UNAME_M} == "X86_64
+.if ${UNAME_M} == "x86_64"
 ARCH = amd64
 .endif
 
@@ -32,7 +32,7 @@ PREFIX = /usr
 CC = cc
 FILES = main.c
 
-CFLAGS = -Wall -Wextra -O3 -I/usr/include -L/usr/lib
+CFLAGS = -Wall -Wextra -I/usr/include -L/usr/lib
 .if ${OS} == "netbsd"
 CFLAGS += -I/usr/X11R7/include -L/usr/X11R7/lib
 .elif ${OS} == "openbsd"
@@ -45,13 +45,11 @@ LDFLAGS = -lX11 -lc -lm
 SLIB = -lxcb -lXau -lXdmcp
 
 all:
-	${CC} ${CFLAGS} -o ${NAME} ${FILES} -static ${LDFLAGS} ${SLIB}
+	${CC} -O3 ${CFLAGS} -o ${NAME} ${FILES} -static ${LDFLAGS} ${SLIB}
 	strip ${NAME}
 
 debug:
-	${CC} -Wall -Wextra -g -I/usr/include -L/usr/lib \
-		-I/usr/X11R6/include -I/usr/X11R6/include/freetype2 -L/usr/X11R6/lib \
-		-o ${NAME} ${FILES} ${LDFLAGS}
+	${CC} -g ${CFLAGS} -o ${NAME} ${FILES} ${LDFLAGS}
 
 clean:
 	rm -rf ${NAME}
@@ -59,14 +57,14 @@ clean:
 dist:
 	mkdir -p ${NAME}-${VERSION} release/src
 	cp -R LICENSE.txt Makefile README.md CHANGELOG.md\
-		main.c src ${NAME}-${VERSION}
+		main.c src dep ${NAME}-${VERSION}
 	tar zcfv release/src/${NAME}-${VERSION}.tar.gz ${NAME}-${VERSION}
 	rm -rf ${NAME}-${VERSION}
 
 release:
 	mkdir -p release/bin/${VERSION}/${OS}/${ARCH}
-	${CC} ${CFLAGS} -o release/bin/${VERSION}/${OS}/${ARCH}/${NAME} ${FILES}\
-		-static ${LDFLAGS}
+	${CC} -O3 ${CFLAGS} -o release/bin/${VERSION}/${OS}/${ARCH}/${NAME} ${FILES}\
+		-static ${LDFLAGS} ${SLIB}
 	strip release/bin/${VERSION}/${OS}/${ARCH}/${NAME}
 
 install:
